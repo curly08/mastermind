@@ -1,0 +1,1 @@
+This is a comand line version of the Mastermind game. You have 12 turns to guess the computer’s secret code.
