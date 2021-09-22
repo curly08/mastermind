@@ -4,10 +4,11 @@
 module Mastermind
   # Game class
   class Game
-    def initialize(codemaker, codebreaker)
-      @codemaker = codemaker
+    def initialize(codebreaker)
       @codebreaker = codebreaker
     end
+
+    # create random code
   end
 
   # Player class
@@ -17,14 +18,16 @@ module Mastermind
     def initialize(name)
       @name = name
     end
+
+    # attempt to guess code
   end
 
-  # Codebreaker class
-  class Codebreaker < Player
+  # HumanPlayer(aka codebreaker) class
+  class HumanPlayer < Player
   end
 
-  # Codemaker class
-  class Codemaker < Player
+  # ComputerPlayer(aka codemaker) class
+  class ComputerPlayer < Player
   end
 
   # DecodingBoard class
@@ -48,20 +51,6 @@ module Mastermind
   # WhiteKeyPegs class
   class WhiteKeyPegs
   end
-
-  def establish_codemaker
-    puts 'Who will be the codemaker?'
-    Codemaker.new(gets.chomp)
-  end
-
-  def establish_codebreaker
-    puts 'Who will be the codebreaker?'
-    Codebreaker.new(gets.chomp)
-  end
 end
 
 include Mastermind
-
-codemaker = establish_codemaker
-codebreaker = establish_codebreaker
-Game.new(codemaker, codebreaker)
