@@ -4,11 +4,32 @@
 module Mastermind
   # Game class
   class Game
-    attr_reader :code, :codebreaker
+    attr_reader :code, :codebreaker, :guess
 
     def initialize
-      @codebreaker = Player.new.name
+      @codebreaker = Player.new
       @code = Code.new.code
+      puts code
+      @game_over = false
+      play_game
+    end
+
+    def play_game
+      while @game_over == false && GuessAttempt.num_of_guesses != GuessAttempt.max_num_of_guesses
+        @guess = GuessAttempt.new(codebreaker.name).guess
+        compare_guess(code, guess)
+      end
+    end
+
+    def compare_guess(code, guess)
+      check_for_correct_guess(code, guess)
+    end
+
+    def check_for_correct_guess(code, guess)
+      return nil unless guess == code
+
+      @game_over = true
+      puts "Congratulations, #{codebreaker.name}! You cracked the code!"
     end
   end
 
@@ -20,8 +41,6 @@ module Mastermind
       puts 'What is your name, codebreaker?'
       @name = gets.chomp
     end
-
-    # attempt to guess code
   end
 
   # Code class
@@ -44,10 +63,11 @@ module Mastermind
     attr_reader :guess
 
     @@num_of_guesses = 0
+    @@max_num_of_guesses = 12
     @@guess_attempts = []
 
-    def initialize
-      puts 'What is your guess?'
+    def initialize(name)
+      puts "What is your guess, #{name}?"
       @guess = gets.chomp.split(' ')
       @@guess_attempts << @guess
       @@num_of_guesses += 1
@@ -59,6 +79,10 @@ module Mastermind
 
     def self.num_of_guesses
       @@num_of_guesses
+    end
+
+    def self.max_num_of_guesses
+      @@max_num_of_guesses
     end
   end
 
@@ -95,6 +119,4 @@ end
 
 include Mastermind
 
-# new_game = Game.new
-# puts new_game.code
-# puts new_game.codebreaker
+Game.new
