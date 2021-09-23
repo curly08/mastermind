@@ -29,8 +29,8 @@ module Mastermind
 
     attr_reader :code
 
-    def initialize
-      @code = randomize_code
+    def initialize(code = randomize_code)
+      @code = code
     end
 
     def randomize_code
@@ -71,4 +71,6 @@ end
 
 include Mastermind
 
-new_game = Game.new('matt')
+# new_game = Game.new('matt')
+code = Code.new
+puts code.code
