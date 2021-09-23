@@ -17,19 +17,23 @@ module Mastermind
     def play_game
       while @game_over == false && GuessAttempt.num_of_guesses != GuessAttempt.max_num_of_guesses
         @guess = GuessAttempt.new(codebreaker.name).guess
-        compare_guess(code, guess)
+        check_for_correct_guess
       end
     end
 
-    def compare_guess(code, guess)
-      check_for_correct_guess(code, guess)
-    end
-
-    def check_for_correct_guess(code, guess)
-      return nil unless guess == code
+    def check_for_correct_guess
+      provide_feedback unless code.eql?(guess)
 
       @game_over = true
       puts "Congratulations, #{codebreaker.name}! You cracked the code!"
+    end
+
+    def provide_feedback
+      @num_of_black_key_pegs = 0
+      guess.each_with_index do |color, index|
+        @num_of_black_key_pegs += 1 if code[index] == color
+      end
+      puts "Black Key Pegs: #{@num_of_black_key_pegs}"
     end
   end
 
@@ -92,28 +96,6 @@ module Mastermind
 
   # # ComputerPlayer(aka codemaker) class
   # class ComputerPlayer < Player
-  # end
-
-  # # DecodingBoard class
-  # class DecodingBoard
-  # end
-
-  # # CodePegs class
-  # class CodePegs
-  # end
-
-  # # CodePegs subclass for each of the six different colors?
-
-  # # KeyPegs class
-  # class KeyPegs
-  # end
-
-  # # BlackKeyPegs class
-  # class BlackKeyPegs
-  # end
-
-  # # WhiteKeyPegs class
-  # class WhiteKeyPegs
   # end
 end
 
