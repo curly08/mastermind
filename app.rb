@@ -4,11 +4,12 @@
 module Mastermind
   # Game class
   class Game
+    attr_reader :code
+
     def initialize(codebreaker)
       @codebreaker = codebreaker
+      @code = Code.new.code
     end
-
-    # create random code
   end
 
   # Player class
@@ -22,35 +23,52 @@ module Mastermind
     # attempt to guess code
   end
 
-  # HumanPlayer(aka codebreaker) class
-  class HumanPlayer < Player
+  # Code class
+  class Code
+    @@possible_code_values = %w[blue red green pink yellow purple]
+
+    attr_reader :code
+
+    def initialize
+      @code = randomize_code
+    end
+
+    def randomize_code
+      4.times.map { @@possible_code_values.sample }
+    end
   end
 
-  # ComputerPlayer(aka codemaker) class
-  class ComputerPlayer < Player
-  end
+  # # HumanPlayer(aka codebreaker) class
+  # class HumanPlayer < Player
+  # end
 
-  # DecodingBoard class
-  class DecodingBoard
-  end
+  # # ComputerPlayer(aka codemaker) class
+  # class ComputerPlayer < Player
+  # end
 
-  # CodePegs class
-  class CodePegs
-  end
+  # # DecodingBoard class
+  # class DecodingBoard
+  # end
 
-  # CodePegs subclass for each of the six different colors?
+  # # CodePegs class
+  # class CodePegs
+  # end
 
-  # KeyPegs class
-  class KeyPegs
-  end
+  # # CodePegs subclass for each of the six different colors?
 
-  # BlackKeyPegs class
-  class BlackKeyPegs
-  end
+  # # KeyPegs class
+  # class KeyPegs
+  # end
 
-  # WhiteKeyPegs class
-  class WhiteKeyPegs
-  end
+  # # BlackKeyPegs class
+  # class BlackKeyPegs
+  # end
+
+  # # WhiteKeyPegs class
+  # class WhiteKeyPegs
+  # end
 end
 
 include Mastermind
+
+new_game = Game.new('matt')
