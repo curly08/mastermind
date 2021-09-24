@@ -1,5 +1,7 @@
 # frozen_string_literal: true
 
+require 'pry-byebug'
+
 # Mastermind module
 module Mastermind
   # Game class
@@ -9,31 +11,43 @@ module Mastermind
     def initialize
       @codebreaker = Player.new
       @code = Code.new.code
-      puts code
+      p code # delete later
       @game_over = false
       play_game
     end
 
     def play_game
-      while @game_over == false && GuessAttempt.num_of_guesses != GuessAttempt.max_num_of_guesses
+      # binding.pry
+      while @game_over == false
         @guess = GuessAttempt.new(codebreaker.name).guess
-        check_for_correct_guess
+        return loser if GuessAttempt.num_of_guesses == GuessAttempt.max_num_of_guesses
+        return winner if code.eql?(guess)
+
+        provide_feedback
       end
-    end
-
-    def check_for_correct_guess
-      provide_feedback unless code.eql?(guess)
-
-      @game_over = true
-      puts "Congratulations, #{codebreaker.name}! You cracked the code!"
     end
 
     def provide_feedback
       @num_of_black_key_pegs = 0
+      @num_of_white_key_pegs = 0
       guess.each_with_index do |color, index|
-        @num_of_black_key_pegs += 1 if code[index] == color
+        if code[index] == color
+          @num_of_black_key_pegs += 1
+        elsif code.include?(color)
+          @num_of_white_key_pegs += 1
+        end
       end
-      puts "Black Key Pegs: #{@num_of_black_key_pegs}"
+      puts "Black Key Pegs: #{@num_of_black_key_pegs}\nWhite Key Pegs: #{@num_of_white_key_pegs}"
+    end
+
+    def winner
+      @game_over = true
+      puts "Congratulations, #{codebreaker.name}! You cracked the code!"
+    end
+
+    def loser
+      @game_over = true
+      puts "#{codebreaker.name}, you did not crack the code within 12 rounds. You lose."
     end
   end
 
