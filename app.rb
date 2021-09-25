@@ -6,12 +6,13 @@ require 'pry-byebug'
 module Mastermind
   # Game class
   class Game
-    attr_reader :code, :codebreaker, :codemaker, :guess
+    attr_reader :name, :code, :codebreaker, :codemaker, :guess_attempt
 
     def initialize
+      @name = ask_for_name
       choose_role
       @code = codemaker.create_code
-      # p code # delete later
+      p code # delete later
       @game_over = false
     end
 
@@ -19,35 +20,41 @@ module Mastermind
     def play_game
       # binding.pry
       while @game_over == false
-        @guess = GuessAttempt.new(codebreaker.name).guess
-        return loser if GuessAttempt.num_of_guesses == GuessAttempt.max_num_of_guesses
-        return winner if code.eql?(guess)
+        puts "\nWhat is your guess, #{codebreaker.name}?"
+        codebreaker.guess
+        return loser if Player.num_of_guesses == Player.max_num_of_guesses
+        return winner if code.eql?(codebreaker.guess_attempt)
 
-        provide_feedback
+        provide_feedback(codebreaker.guess_attempt)
       end
     end
 
     private
 
+    def ask_for_name
+      puts "\nWhat is your name?"
+      gets.chomp
+    end
+
     def choose_role
-      puts 'Do you want to be the codebreaker or the codemaker?'
+      puts "\nDo you want to be the codebreaker or the codemaker?"
       case gets.chomp.downcase
       when 'codebreaker'
-        @codebreaker = HumanPlayer.new('codebreaker')
+        @codebreaker = HumanPlayer.new('codebreaker', name)
         @codemaker = ComputerPlayer.new('codemaker')
       when 'codemaker'
         @codebreaker = ComputerPlayer.new('codebreaker')
-        @codemaker = HumanPlayer.new('codemaker')
+        @codemaker = HumanPlayer.new('codemaker', name)
       end
     end
 
-    def provide_feedback
-      calculate_white_pegs
-      calculate_colored_pegs
+    def provide_feedback(guess)
+      calculate_white_pegs(guess)
+      calculate_colored_pegs(guess)
       puts "Colored Key Pegs: #{@num_of_colored_key_pegs}\nWhite Key Pegs: #{@num_of_white_key_pegs}"
     end
 
-    def calculate_colored_pegs
+    def calculate_colored_pegs(guess)
       @num_of_colored_key_pegs = 0
       guess.each_with_index do |color, index|
         if code[index] == color
@@ -57,7 +64,7 @@ module Mastermind
       end
     end
 
-    def calculate_white_pegs
+    def calculate_white_pegs(guess)
       @num_of_white_key_pegs = 0
       guess.uniq.each do |color|
         if code.any?(color)
@@ -78,19 +85,17 @@ module Mastermind
     end
   end
 
-  # Guess Attempt class
-  class GuessAttempt
-    attr_reader :guess
+  # Player class
+  class Player
+    attr_reader :name, :role, :guess_attempt
 
+    @@possible_code_values = %w[blue red green pink yellow purple]
     @@num_of_guesses = 0
     @@max_num_of_guesses = 12
     @@guess_attempts = []
 
-    def initialize(name)
-      puts "\nWhat is your guess, #{name}?"
-      @guess = gets.chomp.split(' ')
-      @@guess_attempts << @guess
-      @@num_of_guesses += 1
+    def initialize(role)
+      @role = role
     end
 
     def self.guess_attempts
@@ -107,36 +112,39 @@ module Mastermind
   end
 
   # HumanPlayer class
-  class HumanPlayer
-    attr_reader :name
-
-    @@possible_code_values = %w[blue red green pink yellow purple]
-
-    def initialize(role)
-      @role = role
-      puts "\nWhat is your name, #{role}?"
-      @name = gets.chomp
+  class HumanPlayer < Player
+    def initialize(role, name)
+      super(role)
+      @name = name
     end
 
     def create_code
       puts "\nCreate a code consisting of 4 values using the following values (you can repeat colors): #{@@possible_code_values}"
       gets.chomp.split(' ')
     end
+
+    def guess
+      @guess_attempt = gets.chomp.split(' ')
+      @@guess_attempts << @guess
+      @@num_of_guesses += 1
+    end
   end
 
   # ComputerPlayer class
-  class ComputerPlayer
-    attr_reader :name
-
-    @@possible_code_values = %w[blue red green pink yellow purple]
-
+  class ComputerPlayer < Player
     def initialize(role)
+      super(role)
       @name = 'COMPUTER'
-      @role = role
     end
 
     def create_code
       4.times.map { @@possible_code_values.sample }
+    end
+
+    def guess
+      @guess_attempt = gets.chomp.split(' ')
+      @@guess_attempts << @guess
+      @@num_of_guesses += 1
     end
   end
 end
