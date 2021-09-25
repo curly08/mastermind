@@ -9,11 +9,10 @@ module Mastermind
     attr_reader :code, :codebreaker, :guess
 
     def initialize
-      @codebreaker = Player.new
+      choose_role
       @code = Code.new.code
       # p code # delete later
       @game_over = false
-      play_game
     end
 
     def play_game
@@ -27,17 +26,31 @@ module Mastermind
       end
     end
 
-    def provide_feedback
-      calculate_white_pegs
-      calculate_black_pegs
-      puts "Black Key Pegs: #{@num_of_black_key_pegs}\nWhite Key Pegs: #{@num_of_white_key_pegs}"
+    private
+
+    def choose_role
+      puts 'Do you want to be the codebreaker or the codemaker?'
+      case gets.chomp.downcase
+      when 'codebreaker'
+        @codebreaker = HumanPlayer.new('codebreaker')
+        @codemaker = ComputerPlayer.new('codemaker')
+      when 'codemaker'
+        @codebreaker = ComputerPlayer.new('codebreaker')
+        @codemaker = HumanPlayer.new('codemaker')
+      end
     end
 
-    def calculate_black_pegs
-      @num_of_black_key_pegs = 0
+    def provide_feedback
+      calculate_white_pegs
+      calculate_colored_pegs
+      puts "Colored Key Pegs: #{@num_of_colored_key_pegs}\nWhite Key Pegs: #{@num_of_white_key_pegs}"
+    end
+
+    def calculate_colored_pegs
+      @num_of_colored_key_pegs = 0
       guess.each_with_index do |color, index|
         if code[index] == color
-          @num_of_black_key_pegs += 1
+          @num_of_colored_key_pegs += 1
           @num_of_white_key_pegs -= 1
         end
       end
@@ -64,16 +77,6 @@ module Mastermind
     end
   end
 
-  # Player class
-  class Player
-    attr_reader :name
-
-    def initialize
-      puts 'What is your name, codebreaker?'
-      @name = gets.chomp
-    end
-  end
-
   # Code class
   class Code
     attr_reader :code
@@ -83,6 +86,8 @@ module Mastermind
     def initialize(code = randomize_code)
       @code = code
     end
+
+    private
 
     def randomize_code
       4.times.map { @@possible_code_values.sample }
@@ -98,7 +103,7 @@ module Mastermind
     @@guess_attempts = []
 
     def initialize(name)
-      puts "What is your guess, #{name}?"
+      puts "\nWhat is your guess, #{name}?"
       @guess = gets.chomp.split(' ')
       @@guess_attempts << @guess
       @@num_of_guesses += 1
@@ -117,15 +122,28 @@ module Mastermind
     end
   end
 
-  # # HumanPlayer(aka codebreaker) class
-  # class HumanPlayer < Player
-  # end
+  # HumanPlayer class
+  class HumanPlayer
+    attr_reader :name
 
-  # # ComputerPlayer(aka codemaker) class
-  # class ComputerPlayer < Player
-  # end
+    def initialize(role)
+      puts 'What is your name, codebreaker?'
+      @name = gets.chomp
+      @role = role
+    end
+  end
+
+  # ComputerPlayer class
+  class ComputerPlayer
+    attr_reader :name
+
+    def initialize(role)
+      @name = 'COMPUTER'
+      @role = role
+    end
+  end
 end
 
 include Mastermind
 
-Game.new
+Game.new.play_game
