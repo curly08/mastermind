@@ -6,15 +6,16 @@ require 'pry-byebug'
 module Mastermind
   # Game class
   class Game
-    attr_reader :code, :codebreaker, :guess
+    attr_reader :code, :codebreaker, :codemaker, :guess
 
     def initialize
       choose_role
-      @code = Code.new.code
+      @code = codemaker.create_code
       # p code # delete later
       @game_over = false
     end
 
+    # this will have to be refactored depending on the role chosen
     def play_game
       # binding.pry
       while @game_over == false
@@ -68,29 +69,12 @@ module Mastermind
 
     def winner
       @game_over = true
-      puts "Congratulations, #{codebreaker.name}! You cracked the code!"
+      puts "\nCongratulations, #{codebreaker.name}! You cracked the code!"
     end
 
     def loser
       @game_over = true
-      puts "#{codebreaker.name}, you did not crack the code within 12 rounds. You lose. The code was #{code}"
-    end
-  end
-
-  # Code class
-  class Code
-    attr_reader :code
-
-    @@possible_code_values = %w[blue red green pink yellow purple]
-
-    def initialize(code = randomize_code)
-      @code = code
-    end
-
-    private
-
-    def randomize_code
-      4.times.map { @@possible_code_values.sample }
+      puts "\n#{codebreaker.name}, you did not crack the code within 12 rounds. You lose. The code was #{code}"
     end
   end
 
@@ -126,10 +110,17 @@ module Mastermind
   class HumanPlayer
     attr_reader :name
 
+    @@possible_code_values = %w[blue red green pink yellow purple]
+
     def initialize(role)
-      puts 'What is your name, codebreaker?'
-      @name = gets.chomp
       @role = role
+      puts "\nWhat is your name, #{role}?"
+      @name = gets.chomp
+    end
+
+    def create_code
+      puts "\nCreate a code consisting of 4 values using the following values (you can repeat colors): #{@@possible_code_values}"
+      gets.chomp.split(' ')
     end
   end
 
@@ -137,9 +128,15 @@ module Mastermind
   class ComputerPlayer
     attr_reader :name
 
+    @@possible_code_values = %w[blue red green pink yellow purple]
+
     def initialize(role)
       @name = 'COMPUTER'
       @role = role
+    end
+
+    def create_code
+      4.times.map { @@possible_code_values.sample }
     end
   end
 end
