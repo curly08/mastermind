@@ -11,7 +11,7 @@ module Mastermind
     def initialize
       @codebreaker = Player.new
       @code = Code.new.code
-      p code # delete later
+      # p code # delete later
       @game_over = false
       play_game
     end
@@ -28,16 +28,29 @@ module Mastermind
     end
 
     def provide_feedback
+      calculate_white_pegs
+      calculate_black_pegs
+      puts "Black Key Pegs: #{@num_of_black_key_pegs}\nWhite Key Pegs: #{@num_of_white_key_pegs}"
+    end
+
+    def calculate_black_pegs
       @num_of_black_key_pegs = 0
-      @num_of_white_key_pegs = 0
       guess.each_with_index do |color, index|
         if code[index] == color
           @num_of_black_key_pegs += 1
-        elsif code.include?(color)
-          @num_of_white_key_pegs += 1
+          @num_of_white_key_pegs -= 1
         end
       end
-      puts "Black Key Pegs: #{@num_of_black_key_pegs}\nWhite Key Pegs: #{@num_of_white_key_pegs}"
+    end
+
+    def calculate_white_pegs
+      @num_of_white_key_pegs = 0
+      guess.uniq.each do |color|
+        if code.any?(color)
+          @num_of_white_key_pegs += code.count(color) < guess.count(color) ? code.count(color) : guess.count(color)
+        end
+      end
+      @num_of_white_key_pegs
     end
 
     def winner
@@ -47,7 +60,7 @@ module Mastermind
 
     def loser
       @game_over = true
-      puts "#{codebreaker.name}, you did not crack the code within 12 rounds. You lose."
+      puts "#{codebreaker.name}, you did not crack the code within 12 rounds. You lose. The code was #{code}"
     end
   end
 
