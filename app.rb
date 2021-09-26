@@ -12,7 +12,7 @@ module Mastermind
       @name = ask_for_name
       choose_role
       @code = codemaker.create_code
-      p code # delete later
+      # p code # delete later
       @game_over = false
     end
 
@@ -20,7 +20,7 @@ module Mastermind
     def play_game
       # binding.pry
       while @game_over == false
-        puts "\nWhat is your guess, #{codebreaker.name}?"
+        puts "\nWhat is your guess, #{codebreaker.name}? Possible values include: #{%w[blue red green pink yellow purple]}"
         codebreaker.guess
         return loser if Player.num_of_guesses == Player.max_num_of_guesses
         return winner if code.eql?(codebreaker.guess_attempt)
@@ -142,9 +142,12 @@ module Mastermind
     end
 
     def guess
-      @guess_attempt = gets.chomp.split(' ')
+      sleep(3)
+      @guess_attempt = 4.times.map { @@possible_code_values.sample }
+      puts @guess_attempt.join(' ')
       @@guess_attempts << @guess
       @@num_of_guesses += 1
+      # sleep(3)
     end
   end
 end
