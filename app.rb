@@ -1,32 +1,33 @@
 # frozen_string_literal: true
 
-require 'pry-byebug'
-
 # Mastermind module
 module Mastermind
   # Game class
   class Game
-    attr_reader :name, :code, :codebreaker, :codemaker, :guess_attempt
+    attr_reader :name, :code, :codebreaker, :codemaker, :guess_attempt, :num_of_colored_key_pegs, :num_of_white_key_pegs
+
+    @@guess_scores = []
 
     def initialize
       @name = ask_for_name
       choose_role
       @code = codemaker.create_code
-      # p code # delete later
       @game_over = false
     end
 
-    # this will have to be refactored depending on the role chosen
     def play_game
-      # binding.pry
       while @game_over == false
-        puts "\nWhat is your guess, #{codebreaker.name}? Possible values include: #{%w[blue red green pink yellow purple]}"
+        puts "\nWhat is your guess, #{codebreaker.name}? Possible values include: blue, red, green, pink, yellow, purple"
         codebreaker.guess
         return loser if Player.num_of_guesses == Player.max_num_of_guesses
         return winner if code.eql?(codebreaker.guess_attempt)
 
         provide_feedback(codebreaker.guess_attempt)
       end
+    end
+
+    def self.guess_scores
+      @@guess_scores
     end
 
     private
@@ -52,6 +53,8 @@ module Mastermind
       calculate_white_pegs(guess)
       calculate_colored_pegs(guess)
       puts "Colored Key Pegs: #{@num_of_colored_key_pegs}\nWhite Key Pegs: #{@num_of_white_key_pegs}"
+      @score = [@num_of_colored_key_pegs, @num_of_white_key_pegs]
+      @@guess_scores << @score
     end
 
     def calculate_colored_pegs(guess)
@@ -132,9 +135,12 @@ module Mastermind
 
   # ComputerPlayer class
   class ComputerPlayer < Player
+    @@possible_guesses = @@possible_code_values.repeated_permutation(4).to_a
+
     def initialize(role)
       super(role)
       @name = 'COMPUTER'
+      @s = @@possible_guesses.clone
     end
 
     def create_code
@@ -142,12 +148,34 @@ module Mastermind
     end
 
     def guess
-      sleep(3)
-      @guess_attempt = 4.times.map { @@possible_code_values.sample }
+      sleep(2)
+      if @@num_of_guesses.zero?
+        @guess_attempt = %w[blue blue blue blue]
+        @s.delete(@guess_attempt)
+      else
+        @guess_attempt = @@guess_attempts.last.clone
+        case Game.guess_scores.last.sum
+        when 0
+          @guess_attempt.pop(4)
+          4.times { @guess_attempt.push(@@possible_code_values[@@num_of_guesses]) }
+        when 1
+          @guess_attempt.pop(3)
+          3.times { @guess_attempt.push(@@possible_code_values[@@num_of_guesses]) }
+        when 2
+          @guess_attempt.pop(2)
+          2.times { @guess_attempt.push(@@possible_code_values[@@num_of_guesses]) }
+        when 3
+          @guess_attempt.pop(1)
+          @guess_attempt.push(@@possible_code_values[@@num_of_guesses])
+        when 4
+          @guess_attempt.shuffle! unless @s.include?(@guess_attempt)
+        end
+        @s.delete(@guess_attempt)
+        @guess_attempt
+      end
       puts @guess_attempt.join(' ')
-      @@guess_attempts << @guess
+      @@guess_attempts << @guess_attempt
       @@num_of_guesses += 1
-      # sleep(3)
     end
   end
 end
